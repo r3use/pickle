@@ -348,8 +348,20 @@ step_machine(Mach, <<$q, Index, Rest/binary>>) ->
     NewMemo = dict:store(Index, Val, Mach#mach.memo),
     {Mach#mach{memo=NewMemo}, Rest};
 
+% LONG_BINPUT set to memo
+step_machine(Mach, <<$r, Index:32/little, Rest/binary>>) ->
+    [Val | _] = Mach#mach.stack,
+    NewMemo = dict:store(Index, Val, Mach#mach.memo),
+    {Mach#mach{memo=NewMemo}, Rest};
+
 %% BINGET
 step_machine(Mach, <<$h, Index, Rest/binary>>) ->
+    Obj = dict:fetch(Index, Mach#mach.memo),
+    NewStack = [Obj | Mach#mach.stack],
+    {Mach#mach{stack=NewStack}, Rest};
+
+% LONG_BINGET
+step_machine(Mach, <<$j, Index:32/little, Rest/binary>>) ->
     Obj = dict:fetch(Index, Mach#mach.memo),
     NewStack = [Obj | Mach#mach.stack],
     {Mach#mach{stack=NewStack}, Rest};
