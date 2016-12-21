@@ -342,6 +342,14 @@ step_machine(#mach{dict_module=Mod} = Mach, <<$u, Rest/binary>>) ->
     NewStack = set_items(Stack, KeyVals, Mod),
     {Mach#mach{stack=NewStack}, Rest};
 
+% PUT set to memo
+step_machine(Mach, <<$p, Rest/binary>>) ->
+    [Val | _] = Mach#mach.stack,
+    [BinInt, Rest2] = binary:split(Rest, <<$\n>>),
+    Index = list_to_integer(binary_to_list(BinInt)),
+    NewMemo = dict:store(Index, Val, Mach#mach.memo),
+    {Mach#mach{memo=NewMemo}, Rest2};
+
 % BINPUT set to memo
 step_machine(Mach, <<$q, Index, Rest/binary>>) ->
     [Val | _] = Mach#mach.stack,
